@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Drive Course Copy</title>
+</head>
+<body>
+  <h2>Login with Google</h2>
+  <button id="loginBtn">Login</button>
+
+  <div id="copySection" style="display:none;">
+    <input id="driveUrl" placeholder="Paste Google Drive URL" style="width:300px" />
+    <button id="copyBtn">Copy to My Drive</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let tokens = null;
+
+    document.getElementById('loginBtn').onclick = () => {
+      window.open('/api/auth', '_blank');
+      alert('After login, close this tab and paste your tokens here.');
+      // In real app, use OAuth redirect to main page with tokens
+    };
+
+    document.getElementById('copyBtn').onclick = async () => {
+      const url = document.getElementById('driveUrl').value;
+      if (!url) {
+        alert('Enter Drive URL');
+        return;
+      }
+
+      if (!tokens) {
+        alert('Please login first and paste your tokens');
+        return;
+      }
+
+      const res = await fetch('/api/copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driveUrl: url, tokens }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('result').innerText = 'Copied file ID: ' + data.copiedFile.id;
+      } else {
+        document.getElementById('result').innerText = 'Error: ' + data.error;
+      }
+    };
+  </script>
+</body>
+</html>
